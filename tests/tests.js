@@ -125,3 +125,29 @@ QUnit.test('should be able to bind to an event once and trigger it with args', f
 	this.eventBus.trigger('event-name', 1, 2, 3, '4');
 	ok(spy.calledWith(1, 2, 3, '4'));
 });
+
+QUnit.test('should be able to chain "on" calls together', function() {
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy)
+		.on('event-name', spy2)
+		.on('event-name-2', spy3);
+	deepEqual(this.eventBus._listeners, {
+		'event-name': [spy, spy2],
+		'event-name-2': [spy3]
+	});
+});
+
+QUnit.test('should be able to chain "off" calls together', function() {
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy)
+		.on('event-name', spy2)
+		.on('event-name-2', spy3);
+	this.eventBus.off('event-name', spy)
+		.off('event-name', spy2)
+		.off('event-name-2', spy3);
+	deepEqual(this.eventBus._listeners, {});
+});

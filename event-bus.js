@@ -9,6 +9,7 @@ EventBusPrototype.on = function(event, callback) {
 		this._listeners[event] = [];
 	}
 	this._listeners[event].push(callback);
+	return this;
 };
 
 EventBusPrototype.off = function(event, callback) {
@@ -24,6 +25,7 @@ EventBusPrototype.off = function(event, callback) {
 			delete this._listeners[event];
 		}
 	}
+	return this;
 };
 
 EventBusPrototype.once = function(event, callback) {
