@@ -46,3 +46,17 @@ EventBusPrototype.trigger = function(event) {
 		listeners[i].apply(null, args);
 	}
 };
+
+EventBusPrototype.listeners = function(event) {
+	if (event) {
+		return this._listeners[event];
+	}
+	return this._listeners;
+};
+
+EventBusPrototype.clearAll = function() {
+	var listeners = this._listeners;
+	for (var listener in listeners) {
+		this.off(listener);
+	}
+};

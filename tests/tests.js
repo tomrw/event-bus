@@ -68,6 +68,17 @@ QUnit.test('should be able to trigger multiple callbacks for one event', functio
 	ok(spy2.calledWith('10'));
 });
 
+QUnit.test('should trigger events in the correct order', function() {
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy);
+	this.eventBus.on('event-name', spy2);
+	this.eventBus.on('event-name', spy3);
+	this.eventBus.trigger('event-name');
+	sinon.assert.callOrder(spy, spy2, spy3);
+});
+
 QUnit.test('should be able to unbind an event', function() {
 	equal(typeof this.eventBus.off, 'function');
 	var spy = this.spy();
@@ -149,5 +160,47 @@ QUnit.test('should be able to chain "off" calls together', function() {
 	this.eventBus.off('event-name', spy)
 		.off('event-name', spy2)
 		.off('event-name-2', spy3);
+	deepEqual(this.eventBus._listeners, {});
+});
+
+QUnit.test('should be able to retrieve a list of all the events/listeners', function() {
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy);
+	this.eventBus.on('event-name', spy2);
+	this.eventBus.on('event-name-2', spy3);
+	deepEqual(this.eventBus.listeners(), {
+		'event-name': [spy, spy2],
+		'event-name-2': [spy3]
+	});
+});
+
+QUnit.test('should be able to retrieve a list of all listeners for an event', function() {
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy);
+	this.eventBus.on('event-name', spy2);
+	this.eventBus.on('event-name-2', spy3);
+	deepEqual(this.eventBus.listeners('event-name'), [spy, spy2]);
+	deepEqual(this.eventBus.listeners('event-name-2'), [spy3]);
+});
+
+QUnit.test('should not return anything if there are no listeners for an event', function() {
+	var spy = this.spy();
+	this.eventBus.on('event-name', spy);
+	equal(this.eventBus.listeners('fake-event'), undefined);
+});
+
+QUnit.test('should be able to clear up all events and listeners', function() {
+	equal(typeof this.eventBus.clearAll, 'function');
+	var spy = this.spy();
+	var spy2 = this.spy();
+	var spy3 = this.spy();
+	this.eventBus.on('event-name', spy);
+	this.eventBus.on('event-name', spy2);
+	this.eventBus.on('event-name-2', spy3);
+	this.eventBus.clearAll();
 	deepEqual(this.eventBus._listeners, {});
 });
