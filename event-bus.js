@@ -15,13 +15,16 @@ EventBusPrototype.on = function(event, callback) {
 EventBusPrototype.off = function(event, callback) {
 	var listeners = this._listeners[event];
 	if (listeners) {
-		for (var i = listeners.length - 1; i >= 0; --i) {
-			var listener = listeners[i];
-			if (listener === callback) {
-				listeners.splice(i, 1);
+		if (callback) {
+			for (var i = listeners.length - 1; i >= 0; --i) {
+				var listener = listeners[i];
+				if (listener === callback) {
+					listeners[i] = null;
+				}
 			}
+			this._compactEvent(event);
 		}
-		if (!listeners.length || !callback) {
+		else {
 			delete this._listeners[event];
 		}
 	}
@@ -43,7 +46,9 @@ EventBusPrototype.trigger = function(event) {
 	var listeners = this._listeners[event] || [];
 	var args = Array.prototype.slice.call(arguments, 1);
 	for (var i = 0, l = listeners.length; i < l; ++i) {
-		listeners[i].apply(null, args);
+		if (listeners[i]) {
+			listeners[i].apply(null, args);
+		}
 	}
 };
 
@@ -59,4 +64,26 @@ EventBusPrototype.clearAll = function() {
 	for (var listener in listeners) {
 		this.off(listener);
 	}
+};
+
+EventBusPrototype._compactEvent = function(event) {
+	if (this._listeners[event]) {
+		this._listeners[event] = this._compact(this._listeners[event]);
+		if (!this._listeners[event].length) {
+			delete this._listeners[event];
+		}
+	}
+};
+
+EventBusPrototype._compact = function(arr) {
+	if (Array.prototype.filter) {
+		return arr.filter(function(obj) { return obj; });
+	}
+	var compactedArray = [];
+	for (var i = 0, l = arr.length; i < l; ++i) {
+		if (arr[i]) {
+			compactedArray.push(arr[i]);
+		}
+	}
+	return compactedArray;
 };
